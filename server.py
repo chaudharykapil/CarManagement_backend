@@ -78,7 +78,7 @@ def add_car():
                 file_path = os.path.join(app.config['UPLOAD_FOLDER'], random_filename)
                 image.save(file_path)
                 # Create URL for the image that can be accessed publicly
-                image_url = f'/static/uploads/{random_filename}'
+                image_url = f'/{UPLOAD_FOLDER}/{random_filename}'
                 image_urls.append(image_url)
     
     # Store car details in Firestore
@@ -93,10 +93,32 @@ def add_car():
         'images': image_urls,
         'transmission': transmission,
     }
-    car = DBClient.AddNewCar(cardata=car_data)
-    return "ok"
-    return jsonify({"message": "Car added successfully!", "car_id": car[1].id}), 201
+    try:
+        car = DBClient.AddNewCar(cardata=car_data)
+        return jsonify({"message": "Car added successfully!", "car_id": car[1].id}), 201
+    except Exception as e:
+        return jsonify({"error": "Car not Added"}), 404
 
+@app.route('/cars', methods=['GET'])
+def get_cars():
+    user_id = request.args.get('user_id')  # Get user ID from query params
+    cars = DBClient.GetCars(userid=user_id)
+    
+    car_list = []
+    for car in cars:
+        car_data = car.to_dict()
+        car_data['car_id'] = car.id
+        car_list.append(car_data)
+    
+    return jsonify(car_list)
+
+
+@app.route('/cars/<car_id>', methods=['DELETE'])
+def delete_car(car_id):
+    print(car_id)
+    res = DBClient.deleteCar(car_id=car_id)
+    print(res)
+    return jsonify(res)
 
 if __name__ == '__main__':
     app.run(debug=True)

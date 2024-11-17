@@ -19,6 +19,21 @@ class DBClient:
     def AddNewCar(cardata):
         car_ref = DBClient.db.collection('cars').add(cardata)
         return car_ref
+    @staticmethod
+    def GetCars(userid):
+        cars = DBClient.db.collection('cars').where('user_id', '==', userid).stream()
+        return cars
+    @staticmethod
+    def deleteCar(car_id):
+        car_ref = DBClient.db.collection('cars').document(car_id)
+        car = car_ref.get()
+    
+        if not car.exists:
+            return {"error": "Car not found"}, 404
+        
+        # Optionally, delete images from Firebase Storage if required
+        car_ref.delete()
+        return {"message": "Car deleted successfully!"}
 
 
 
