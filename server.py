@@ -1,5 +1,5 @@
 
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify,redirect
 from flask_cors import CORS
 from werkzeug.utils import secure_filename
 import uuid,os
@@ -172,5 +172,9 @@ def edit_car():
     print(res)
     return jsonify(res)
 
-if __name__ == '__main__':
-    app.run(debug=True)
+@app.route("/api/docs")
+def docs():
+    return redirect("https://www.postman.com/orbital-module-pilot-74784593/car-management-api/documentation/glmxe0o/car-management-api")
+
+# if __name__ == '__main__':
+#     app.run(debug=True)
