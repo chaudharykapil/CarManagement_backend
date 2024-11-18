@@ -75,7 +75,7 @@ def add_car():
     image_urls = []
     if 'images' in request.files:
         images = request.files.getlist('images')
-        if(len(image) > 10):
+        if(len(images) > 10):
             return jsonify({"error": "Images Exceed over 10"}), 404
         for image in images:
             if allowed_file(image.filename):
