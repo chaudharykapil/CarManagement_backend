@@ -84,7 +84,8 @@ def add_car():
                 random_filename = str(uuid.uuid4()) + '.' + file_extension 
                 file_path = os.path.join(app.config['UPLOAD_FOLDER'], random_filename)
                 #image.save(file_path)
-                res = vb_store.put("car/images/"+random_filename,bytes(image.stream),{"addRandomSuffix": "false"})
+                
+                res = vb_store.put("car/images/"+random_filename,image.stream.read(),{"addRandomSuffix": "false"})
                 # Create URL for the image that can be accessed publicly
                 #image_url = f'/{UPLOAD_FOLDER}/{random_filename}'
                 image_url = res.url
