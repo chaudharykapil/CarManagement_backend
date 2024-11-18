@@ -88,7 +88,7 @@ def add_car():
                 res = vb_store.put("car/images/"+random_filename,image.stream.read(),{"addRandomSuffix": "false"})
                 # Create URL for the image that can be accessed publicly
                 #image_url = f'/{UPLOAD_FOLDER}/{random_filename}'
-                image_url = res.url
+                image_url = res["url"]
                 image_urls.append(image_url)
     
     # Store car details in Firestore
