@@ -5,6 +5,7 @@ from werkzeug.utils import secure_filename
 import uuid,os
 from dotenv import load_dotenv
 from utils.DBManager import DBClient,AuthClient
+import vercel_blob.blob_store as vb_store
 load_dotenv()
 
 app = Flask(__name__)
@@ -82,9 +83,11 @@ def add_car():
                 file_extension = image.filename.rsplit('.', 1)[1].lower()  # Get the file extension
                 random_filename = str(uuid.uuid4()) + '.' + file_extension 
                 file_path = os.path.join(app.config['UPLOAD_FOLDER'], random_filename)
-                image.save(file_path)
+                #image.save(file_path)
+                res = vb_store.put("car/images/"+random_filename,{"addRandomSuffix": "false"})
                 # Create URL for the image that can be accessed publicly
-                image_url = f'/{UPLOAD_FOLDER}/{random_filename}'
+                #image_url = f'/{UPLOAD_FOLDER}/{random_filename}'
+                image_url = res.url
                 image_urls.append(image_url)
     
     # Store car details in Firestore
