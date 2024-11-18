@@ -46,13 +46,17 @@ def login():
     data = request.json
     email = data['email']
     password = data['password']
-    print(data)
     try:
-        user = AuthClient.getUserByEmail(email)
-        # Authentication logic can be added here for token validation
+        user = AuthClient.LoginWithEmailPassword(email,password)
         print(user)
-        return jsonify({"message": "User logged in successfully!", "uid": user.uid}), 200
-    except:
+        if "email" not in user:
+            return jsonify({"error": "Email or Password is Wrong"}), 404
+
+            # Authentication logic can be added here for token validation
+        print(user)
+        return jsonify({"message": "User logged in successfully!", "uid": user["localId"]}), 200
+    except Exception as e:
+        print(e)
         return jsonify({"error": "User not found"}), 404
     
 
@@ -71,6 +75,8 @@ def add_car():
     image_urls = []
     if 'images' in request.files:
         images = request.files.getlist('images')
+        if(len(image) > 10):
+            return jsonify({"error": "Images Exceed over 10"}), 404
         for image in images:
             if allowed_file(image.filename):
                 file_extension = image.filename.rsplit('.', 1)[1].lower()  # Get the file extension
@@ -117,6 +123,48 @@ def get_cars():
 def delete_car(car_id):
     print(car_id)
     res = DBClient.deleteCar(car_id=car_id)
+    print(res)
+    return jsonify(res)
+
+
+@app.route('/cars/search', methods=['GET'])
+def search_cars():
+    # Extract search keyword and user ID (optional) from query parameters
+    keyword = request.args.get('keyword', '').lower()
+    user_id = request.args.get('user_id')  # Optional: For searching only within a user's cars
+    print(request.args.to_dict())
+    if not keyword:
+        return jsonify({"error": "Keyword is required"}), 400
+    
+    try:
+        # Fetch all cars (or only the user's cars if `user_id` is provided)
+        cars = DBClient.GetCars(userid=user_id)
+        
+        # Filter cars based on keyword match in title, description, or tags
+        matching_cars = []
+        for car in cars:
+            car_data = car.to_dict()
+            car_data['car_id'] = car.id
+            
+            # Check if the keyword exists in any of the searchable fields
+            if (keyword in car_data.get('name', '').lower() or
+                keyword in car_data.get('description', '').lower()):
+                matching_cars.append(car_data)
+        
+        return jsonify(matching_cars), 200
+    
+    except Exception as e:
+        print(e)
+        return jsonify({"error": "An error occurred while searching", "details": str(e)}), 500
+
+
+
+
+@app.route('/cars/edit', methods=['POST'])
+def edit_car():
+    car_id = request.form['car_id']
+    data = request.form
+    res = DBClient.editCar(car_id=car_id,data=data)
     print(res)
     return jsonify(res)
 

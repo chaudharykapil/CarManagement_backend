@@ -3,9 +3,11 @@ import firebase_admin
 from firebase_admin import credentials, firestore, auth
 import uuid
 from dotenv import load_dotenv
+import requests
 import json
 load_dotenv()
 
+WEBAUTH_ENDPOINT = f"https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword"
 
 firebase_config = json.loads(os.getenv("FIREBASE_SERVICE_ACCOUNT"))
 cred = credentials.Certificate(firebase_config)
@@ -34,6 +36,15 @@ class DBClient:
         # Optionally, delete images from Firebase Storage if required
         car_ref.delete()
         return {"message": "Car deleted successfully!"}
+    @staticmethod
+    def editCar(car_id,data):
+        car_ref = DBClient.db.collection('cars').document(car_id)
+        if not car_ref.get().exists:
+            return {"error": "Car not found"}, 404
+        
+        car_ref.update(data)
+        return {"message": "Car Edit successfully!"}
+    
 
 
 
@@ -47,5 +58,15 @@ class AuthClient:
     @staticmethod
     def getUserByEmail(email):
         user = auth.get_user_by_email(email=email)
+        auth.sign
         return user
+    
+    @staticmethod
+    def LoginWithEmailPassword(email,password):
+        payload = json.dumps({"email":email, "password":password, "return_secure_token":False})
+        r = requests.post(url=WEBAUTH_ENDPOINT,
+            params={"key":os.getenv("FIREBASE_WEB_API_KEY")},
+            data=payload
+        )
+        return r.json()
     
